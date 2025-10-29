@@ -13,7 +13,8 @@
 \RequirePackage{graphicx}
 \RequirePackage[dvipsnames]{xcolor}
 \RequirePackage{etoolbox}   % <- para \ifdefstring
-
+ 
+\RequirePackage[hidelinks]{hyperref}
 % Página e imágenes
 \geometry{letterpaper, margin=2.5cm}
 \graphicspath{{img/}}
@@ -34,7 +35,7 @@
 \newcommand{\Asignatura}[1]{\def\ucbAsig{#1}}
 \newcommand{\Docente}[1]{\def\ucbDoc{#1}}
 \newcommand{\LugarFecha}[1]{\def\ucbLugarFecha{#1}}
-
+\newcommand{\CorreoDocente}[1]{\def\ucbCorreo{#1}}  
 % Valores por defecto
 \TituloGuia{Guía de Laboratorio}
 \Asignatura{Asignatura}
@@ -54,6 +55,7 @@
 	\ifdefstring{\ucbCarrera}{BMD}{%
 		\def\ucbColor{ucbblueBMD}\def\ucbLogo{img/bmd.png}%
 	}{}%
+	\hypersetup{colorlinks=true, linkcolor=\ucbColor, urlcolor=\ucbColor}
 }
 
 % Al llamar \Carrera{...} actualizamos inmediatamente estilo
@@ -61,7 +63,31 @@
 	\def\ucbCarrera{#1}%
 	\SetEstiloCarrera
 }
+% ---- Dificultad y supervisión ----------------------------------
+% \Dificultad{Baja|Media|Alta}
+\newcommand{\Dificultad}[1]{\def\ucbDiff{#1}}
+\Dificultad{Media} % por defecto
 
+% Calcula color y texto de supervisión según la dificultad
+\newcommand{\SetDificultad}{%
+	\def\ucbDiffColor{YellowOrange}%
+	\def\ucbSupervisionTexto{Supervisión no obligatoria}%
+	\ifdefstring{\ucbDiff}{Baja}{%
+		\def\ucbDiffColor{OliveGreen}%
+		\def\ucbSupervisionTexto{Sin supervisión obligatoria}%
+	}{}%
+	\ifdefstring{\ucbDiff}{Media}{%
+		\def\ucbDiffColor{Yellow}%
+		\def\ucbSupervisionTexto{Supervisión no obligatoria}%
+	}{}%
+	\ifdefstring{\ucbDiff}{Alta}{%
+		\def\ucbDiffColor{BrickRed}%
+		\def\ucbSupervisionTexto{Supervisión obligatoria}%
+	}{}%
+}
+\providecommand{\ucbDiff}{Media}
+\providecommand{\ucbDiffColor}{Yellow}
+\providecommand{\ucbSupervisionTexto}{Supervisión no obligatoria}
 % Portada simple
 \newcommand{\Portada}{%
 	\SetEstiloCarrera % seguridad por si el usuario cambió algo después
@@ -82,10 +108,21 @@
 		\begin{tabular}{@{}ll}
 			\textbf{Asignatura:} & \ucbAsig \\
 			\textbf{Docente:} & \ucbDoc \\
-			\textbf{Carrera:} & \ucbCarrera \\
+			\textbf{Correo:} & \href{mailto:\ucbCorreo}{\texttt{\ucbCorreo}} \\
 			\textbf{Lugar / Fecha:} & \ucbLugarFecha \\
 		\end{tabular}
-		
+	
+		\vspace{1.9cm}
+		% --- Banda de dificultad y requisito de supervisión ---
+		\SetDificultad
+		\noindent
+		\colorbox{\ucbDiffColor!20}{%
+			\begin{minipage}{0.9\linewidth}
+				\textbf{Dificultad:} \ucbDiff \quad
+				\textbf{Requisito:} \ucbSupervisionTexto
+			\end{minipage}%
+		}
+			
 		\vfill
 		{\small Formato UCB – Versión base (2025)}\\[0.4cm]
 	\end{center}
