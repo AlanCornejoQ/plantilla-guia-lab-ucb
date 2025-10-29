@@ -13,6 +13,9 @@
 \RequirePackage{graphicx}
 \RequirePackage[dvipsnames]{xcolor}
 \RequirePackage{etoolbox}   % <- para \ifdefstring
+\RequirePackage[hidelinks]{hyperref}
+\RequirePackage{fancyhdr}   % encabezado/pie
+\setlength{\headheight}{18pt} % evita warning de fancyhdr
 
 % Página e imágenes
 \geometry{letterpaper, margin=2.5cm}
@@ -34,7 +37,7 @@
 \newcommand{\Asignatura}[1]{\def\ucbAsig{#1}}
 \newcommand{\Docente}[1]{\def\ucbDoc{#1}}
 \newcommand{\LugarFecha}[1]{\def\ucbLugarFecha{#1}}
-
+\newcommand{\CorreoDocente}[1]{\def\ucbCorreo{#1}}  
 % Valores por defecto
 \TituloGuia{Guía de Laboratorio}
 \Asignatura{Asignatura}
@@ -54,6 +57,7 @@
 	\ifdefstring{\ucbCarrera}{BMD}{%
 		\def\ucbColor{ucbblueBMD}\def\ucbLogo{img/bmd.png}%
 	}{}%
+	\hypersetup{colorlinks=true, linkcolor=\ucbColor, urlcolor=\ucbColor}
 }
 
 % Al llamar \Carrera{...} actualizamos inmediatamente estilo
@@ -61,15 +65,40 @@
 	\def\ucbCarrera{#1}%
 	\SetEstiloCarrera
 }
+% ---- Dificultad y supervisión ----------------------------------
+% \Dificultad{Baja|Media|Alta}
+\newcommand{\Dificultad}[1]{\def\ucbDiff{#1}}
+\Dificultad{Media} % por defecto
 
+% Calcula color y texto de supervisión según la dificultad
+\newcommand{\SetDificultad}{%
+	\def\ucbDiffColor{YellowOrange}%
+	\def\ucbSupervisionTexto{Supervisión no obligatoria}%
+	\ifdefstring{\ucbDiff}{Baja}{%
+		\def\ucbDiffColor{OliveGreen}%
+		\def\ucbSupervisionTexto{Sin supervisión obligatoria}%
+	}{}%
+	\ifdefstring{\ucbDiff}{Media}{%
+		\def\ucbDiffColor{Yellow}%
+		\def\ucbSupervisionTexto{Supervisión no obligatoria}%
+	}{}%
+	\ifdefstring{\ucbDiff}{Alta}{%
+		\def\ucbDiffColor{BrickRed}%
+		\def\ucbSupervisionTexto{Supervisión obligatoria}%
+	}{}%
+}
+\providecommand{\ucbDiff}{Media}
+\providecommand{\ucbDiffColor}{Yellow}
+\providecommand{\ucbSupervisionTexto}{Supervisión no obligatoria}
 % Portada simple
 \newcommand{\Portada}{%
 	\SetEstiloCarrera % seguridad por si el usuario cambió algo después
 	\thispagestyle{empty}
 	\begin{center}
 		% Logos (carrera arriba, UCB debajo)
-		\IfFileExists{\ucbLogo}{\includegraphics[height=90pt]{\ucbLogo}}{}\\[0.4cm]
 		\IfFileExists{\ucbLogoUCB}{\includegraphics[height=200pt]{\ucbLogoUCB}}{}\\[0.6cm]
+		\IfFileExists{\ucbLogo}{\includegraphics[height=90pt]{\ucbLogo}}{}\\[0.4cm]
+		
 		
 		{\Large \textbf{Universidad Católica Boliviana “San Pablo”}}\\[0.25cm]
 		{\normalsize Departamento de Ciencias de la Tecnología e Innovación – Tarija}\\[0.8cm]
@@ -81,12 +110,80 @@
 		\begin{tabular}{@{}ll}
 			\textbf{Asignatura:} & \ucbAsig \\
 			\textbf{Docente:} & \ucbDoc \\
-			\textbf{Carrera:} & \ucbCarrera \\
+			\textbf{Correo:} & \href{mailto:\ucbCorreo}{\texttt{\ucbCorreo}} \\
 			\textbf{Lugar / Fecha:} & \ucbLugarFecha \\
 		\end{tabular}
-		
+	
+		\vspace{1.9cm}
+		% --- Banda de dificultad y requisito de supervisión ---
+		\SetDificultad
+		\noindent
+		\colorbox{\ucbDiffColor!20}{%
+			\begin{minipage}{0.9\linewidth}
+				\textbf{Dificultad:} \ucbDiff \quad
+				\textbf{Requisito:} \ucbSupervisionTexto
+			\end{minipage}%
+		}
+			
 		\vfill
 		{\small Formato UCB – Versión base (2025)}\\[0.4cm]
 	\end{center}
 	\clearpage
+}
+
+% -----------------------------------------------------------------------------
+% Índice sin numeración y contenido numerado
+% -----------------------------------------------------------------------------
+
+% Profundidad del índice (se verán \section y \subsection)
+% Profundidad del índice: incluir subsubsections
+\setcounter{tocdepth}{3}
+
+% Página de Índice SIN numeración, con título centrado una sola vez
+\newcommand{\PaginaIndice}{%
+	\clearpage
+	\thispagestyle{empty}%
+	\begin{center}
+		{\Large \textbf{Índice}}
+	\end{center}
+	
+	% Mostrar la TOC sin que añada su propio título:
+	\begingroup
+	\renewcommand{\contentsname}{}% evita el "Índice" interno de \tableofcontents
+	\tableofcontents
+	\endgroup
+	\clearpage
+}
+\makeatletter
+% section
+\renewcommand\l@section{\@dottedtocline{1}{0em}{1.5em}}
+% subsection
+\renewcommand\l@subsection{\@dottedtocline{2}{1.5em}{2.3em}}
+% subsubsection
+\renewcommand\l@subsubsection{\@dottedtocline{3}{3.8em}{3.2em}}
+\makeatother
+
+% Activa encabezado/pie institucional para el contenido
+\newcommand{\ActivarEncabezadoContenido}{%
+	\pagestyle{fancy}%
+	\fancyhf{}%
+	% Encabezado
+	\fancyhead[L]{\IfFileExists{\ucbLogo}{\includegraphics[height=30pt]{\ucbLogo}}{}}%
+	\fancyhead[R]{\small \ucbAsig}%
+	% Pie
+	\fancyfoot[L]{\small \href{mailto:\ucbCorreo}{\ucbCorreo}}%
+	\fancyfoot[R]{\thepage}%
+	% Líneas
+	\renewcommand{\headrulewidth}{0.4pt}%
+	\renewcommand{\footrulewidth}{0pt}%
+	\addtolength{\headsep}{4pt}
+}
+
+% Inicio de contenido numerado (arabic) desde 1
+\newcommand{\InicioContenido}{%
+	\clearpage
+	\pagenumbering{arabic}%
+	\setcounter{page}{1}%
+	\pagestyle{plain}% numeración simple abajo (puedes cambiar luego a fancyhdr)
+	\ActivarEncabezadoContenido
 }
