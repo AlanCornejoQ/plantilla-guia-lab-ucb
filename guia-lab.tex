@@ -2,12 +2,12 @@
 \usepackage{guia-lab}
 
 \Carrera{IMT} % <-- IMT | BMD | SIS
-\TituloGuia{Guía de Laboratorio – Formato Institucional}
-\Asignatura{(Nombre de la Asignatura)}
-\Docente{(Nombre del Docente Responsable)}
-\CorreoDocente{(correo@ucb.edu.bo)} 
-\LugarFecha{Tarija, (Fecha de elaboración o revisión)}
-\Dificultad{Alta} % <-- Baja | Media | Alta
+\TituloGuia{Práctica 01 – Temporizador con Interrupciones y EEPROM}
+\Asignatura{Sistemas Embebidos I}
+\Docente{E. Alan Cornejo Quito}
+\CorreoDocente{ecornejo@ucb.edu.bo} 
+\LugarFecha{Tarija, 31 de octubre de 2025}
+\Dificultad{Baja} % <-- Baja | Media | Alta
 
 \begin{document}
 	\Portada
@@ -16,58 +16,111 @@
 	% --- Contenido numerado desde 1 ---
 	\InicioContenido
 		
-	% ----------------------------------------------------
+	% ========================================================
 	\section{Objetivos}
-	Establecer los propósitos principales de la práctica.  
-	En este apartado se definen los **objetivos generales y específicos**, que orientan las actividades y resultados esperados del laboratorio.
-	
-	% ----------------------------------------------------
-	\section{Materiales y Equipos}
-	Enumerar los materiales, instrumentos y dispositivos requeridos para el desarrollo de la práctica.  
-	Debe incluir tanto el equipamiento físico como el software o entornos de programación necesarios para la ejecución.
-	
-	% ----------------------------------------------------
-	\section{Metodología}
-	Describir la secuencia de pasos a seguir durante la práctica, asegurando claridad y reproducibilidad.  
-	Cada etapa debe especificar las acciones necesarias y los parámetros que deben controlarse o medirse.
-	
-	\subsection{Parte A — Preparación}
-	Detallar la configuración inicial del entorno de trabajo, las conexiones del circuito, la disposición de los equipos y cualquier calibración previa necesaria.
-	
-	\subsection{Parte B — Ejecución}
-	Indicar las acciones que deben realizarse para completar la práctica, incluyendo los procedimientos de operación y registro de datos.
-	
-	\subsubsection{Etapa 1 — Configuración del Hardware}
-	Definir el procedimiento para la conexión, verificación y encendido de los dispositivos electrónicos o módulos empleados.
-	
-	\subsubsection{Etapa 2 — Prueba y Observación}
-	Explicar la forma en que se desarrollan las pruebas, los parámetros que deben observarse y los datos que se deben registrar.
-	
-	% ----------------------------------------------------
-	\section{Cuestionario}
-	Incluir una serie de preguntas destinadas a evaluar la comprensión de los conceptos aplicados y de los resultados obtenidos.  
-	Las preguntas pueden abordar aspectos conceptuales, técnicos o de interpretación.
-	
-	% ----------------------------------------------------
-	\section{Rúbrica de Evaluación}
-	Detallar los criterios que se aplicarán para la calificación de la práctica.  
-	Pueden considerarse aspectos como:
+	Aplicar el manejo de interrupciones externas, temporización y almacenamiento persistente mediante EEPROM en un entorno de microcontroladores.  
+	Los objetivos específicos son:
 	\begin{itemize}
-		\item Cumplimiento de los objetivos establecidos.
-		\item Organización, claridad y estructura del informe.
-		\item Aplicación correcta de procedimientos y metodología.
-		\item Nivel de análisis y comprensión demostrada.
-		\item Participación y trabajo colaborativo.
+		\item Implementar un temporizador configurable en minutos y segundos.
+		\item Emplear interrupciones para la gestión de eventos de usuario.
+		\item Guardar y recuperar parámetros en la memoria EEPROM.
+		\item Utilizar una estructura de máquina de estados (FSM) para controlar el flujo del sistema.
 	\end{itemize}
 	
-	% ----------------------------------------------------
-	\section{Seguridad y Buenas Prácticas}
-	Establecer las normas de seguridad específicas del laboratorio.  
-	Se recomienda señalar los equipos de protección personal requeridos, las precauciones frente a riesgos eléctricos o mecánicos y las condiciones de orden y limpieza del puesto de trabajo.
+	% ========================================================
+	\section{Materiales y Equipos}
+	\subsection{Hardware}
+	\begin{itemize}
+		\item Placa de desarrollo \textbf{Arduino UNO} o equivalente.
+		\item Cuatro botones pulsadores.
+		\item Dos LEDs indicadores (MIN/SEG).
+		\item Resistencias de 220~$\Omega$ y 10~k$\Omega$.
+		\item Protoboard y cableado.
+	\end{itemize}
 	
-	% ----------------------------------------------------
+	\subsection{Software}
+	\begin{itemize}
+		\item Entorno de desarrollo Arduino IDE o VSCode con PlatformIO.
+		\item Biblioteca estándar \texttt{EEPROM.h}.
+		\item Monitor serial para verificación de datos.
+	\end{itemize}
+	
+	% ========================================================
+
+	\section{Metodología}
+	
+	\subsection{Parte A — Configuración inicial}
+	\begin{enumerate}
+		\item Realizar las conexiones de botones y LEDs según el diagrama de pines establecido.
+		\item Asignar interrupciones externas para los botones \texttt{UP} y \texttt{DOWN}.
+		\item Configurar la comunicación serial y la lectura de parámetros desde la EEPROM.
+	\end{enumerate}
+	
+	\subsection{Parte B — Lógica de control}
+	\begin{enumerate}
+		\item Definir la estructura de la máquina de estados:
+		\begin{itemize}
+			\item \textbf{Configuración:} ajuste de minutos y segundos mediante botones.
+			\item \textbf{Guardado:} almacenamiento de valores en EEPROM.
+			\item \textbf{Conteo:} ejecución del temporizador decreciente.
+			\item \textbf{Fin:} notificación de finalización y reinicio.
+		\end{itemize}
+		\item Implementar las rutinas de interrupción para los botones que alteran los valores del temporizador.
+		\item Procesar las banderas de interrupción en el bucle principal para mantener la ejecución no bloqueante.
+	\end{enumerate}
+	
+	\subsection{Parte C — Validación del sistema}
+	\begin{itemize}
+		\item Comprobar la escritura y lectura correcta de datos en la EEPROM.
+		\item Verificar la respuesta del sistema ante pulsaciones sucesivas o rápidas.
+		\item Confirmar la exactitud del conteo y el reinicio tras la finalización.
+	\end{itemize}
+	
+	% --- Diagrama FSM ---
+	\section{Diagrama de Estados (FSM)}
+	La Figura~\ref{fig:fsm} representa el flujo general del sistema temporizador y las transiciones entre los estados principales.
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.65\linewidth]{img/fsm.png}
+		\caption{FSM del temporizador: configuración, guardado, conteo y reinicio.}
+		\label{fig:fsm}
+	\end{figure}
+	\newpage
+	% ========================================================
+	\section{Cuestionario}
+	\begin{enumerate}
+		\item ¿Cuál es la finalidad de utilizar interrupciones en lugar de lectura por sondeo?
+		\item ¿Qué ventajas ofrece almacenar parámetros en la EEPROM frente a variables volátiles?
+		\item ¿Qué beneficios aporta una estructura basada en FSM en comparación con un código secuencial lineal?
+		\item ¿Cómo puede prevenirse el rebote de los pulsadores sin afectar la respuesta del sistema?
+	\end{enumerate}
+	
+	% ========================================================
+	\section{Rúbrica de Evaluación}
+	\begin{itemize}
+		\item \textbf{Estructura del código:} modularidad y claridad (20\%).
+		\item \textbf{Funcionamiento del sistema:} temporizador, interrupciones y EEPROM (30\%).
+		\item \textbf{Verificación:} evidencia funcional y mensajes de diagnóstico (20\%).
+		\item \textbf{Presentación del informe:} formato, redacción y coherencia (20\%).
+		\item \textbf{Cumplimiento y participación:} entrega oportuna y documentación (10\%).
+	\end{itemize}
+	
+	% ========================================================
+	\section{Seguridad y Buenas Prácticas}
+	\begin{itemize}
+		\item Realizar las conexiones con la placa sin alimentación.
+		\item Verificar polaridades y niveles de tensión antes de energizar el circuito.
+		\item Mantener orden y limpieza en el área de trabajo.
+		\item Respetar las normas del laboratorio y las recomendaciones del docente responsable.
+	\end{itemize}
+	
+	% ========================================================
 	\section{Formato y Entrega}
-	Precisar la forma y los plazos de entrega del informe o producto final de la práctica.  
-	Debe indicarse el formato esperado (digital o impreso), la estructura del documento, los archivos complementarios a incluir y el medio de presentación oficial (correo, plataforma institucional o repositorio).
-		
+	\begin{itemize}
+		\item Archivos fuente del proyecto: \texttt{main.ino}, \texttt{funciones.h}, \texttt{funciones.cpp} cargados a la plataforma LMS y a repositorio personal en GitHub.
+		\item Informe en formato PDF.
+		\item Evidencias del funcionamiento mediante capturas o fotografías.
+		\item Inclusión del diagrama FSM (Figura~\ref{fig:fsm}) en el informe final.
+	\end{itemize}
 \end{document}
